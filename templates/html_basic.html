@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    很     好普通版
+    <h1>很好 h1</h1>
+    <h2>很好 h2</h2>
+    <h3>很好 h3</h3>
+    <form action="/register" method="post">
+        <textarea name="message" rows="8" cols="40"></textarea>
+        <textarea name="author" rows="8" cols="40"></textarea>
+        <button type="submit">POST提交</button>
+    </form>
+    <form action="/register" method="get">
+        <textarea name="message" rows="8" colos="40"></textarea>
+        <textarea name="author" rows="8" colos="40"></textarea>
+        <button type="submit">GET提交</button>
+    </form>
+    {{messages}}
+</body>
+</html>
