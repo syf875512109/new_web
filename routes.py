@@ -4,7 +4,35 @@
 
 from models import User, Message
 from utils import log
+import random
+
+
 message_list = []
+session = {}
+
+
+def random_id():
+    s = 'gasdgfasdfsad6gf5safd5gfagasd'
+    st = ''
+    for i in range(10):
+        st += s[random.randint(0, len(s) -1)]
+
+    return st
+
+
+def get_cookie(request):
+    log('Cookie', request.cookie)
+    username = request.cookie.get('user', '游客')
+    if username != '游客':
+        username = session[username]
+    return username
+
+
+def response_with_headers(headers):
+    header = 'HTTP/1.1 200 OK\r\n'
+    header += ''.join(['{}: {}\r\n'.format(k, v) for k, v in headers.items()])
+    log('header', header)
+    return header
 
 
 def template(name):
@@ -21,20 +49,29 @@ def route_index(request):
 
 
 def route_login(request):
-    headers = 'HTTP/1.1 200 ok\r\nContent-Type: text/html\r\n'
+    h = {
+        'Content-Type': 'text/html',
+    }
+    username = get_cookie(request)
     if request.method == 'POST':
         form = request.form()
         u = User.new(form)
         if u.validate_login():
+            s = random_id()
+            session[s] = u.username
+            h['Set-Cookie'] = 'user={}'.format(s)
+            log('h', h)
             result = '登录成功'
         else:
             result = '用户名或密码错误'
     else:
         result = ''
 
+    header = response_with_headers(h)
     body = template('login.html')
+    body = body.replace('{{username}}', username)
     body = body.replace('{{result}}', result)
-    r = headers + '\r\n' + body
+    r = header + '\r\n' + body
 
     return r.encode(encoding='utf-8')
 

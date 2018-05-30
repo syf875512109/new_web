@@ -14,6 +14,8 @@ class Request(object):
         self.path = ''
         self.query = {}
         self.body = ''
+        self.header = {}
+        self.cookie = {}
 
     def form(self):
         args = self.body.split('&')
@@ -30,7 +32,6 @@ request = Request()
 
 
 def error(code=404):
-
     e = {
         404: b'HTTP/1.1 404 NOT FOUND\r\n\r\n<h1>NOT FOUND</h1>',
     }
@@ -64,6 +65,7 @@ def parsed_path(path):
 def response_for_path(path):
     request.path, request.query = parsed_path(path)
     log('({})({}), ({}), ({})'.format(request.method, request.path, request.query, request.body))
+    log('({})'.format(request.cookie))
     r = {
         # '/static': route_static,
         # '/': route_index,
@@ -73,6 +75,23 @@ def response_for_path(path):
     r.update(route_dict)
     response = r.get(request.path, error)
     return response(request)
+
+
+def get_header(r):
+    header = r.split('\r\n\r\n')[0]
+    header = header.split('\r\n', 1)[1]
+    h = {}
+    for msg in header.split('\r\n'):
+        k, v = msg.split(': ')
+        h[k] = v
+    cook = h.get('Cookie', '')
+    log('cookie,', cook)
+    if '=' in cook:
+        for arg in cook.split('; '):
+            x, y = arg.split('=')
+            request.cookie[x] = y
+
+    return h
 
 
 def run(host='', port=3000):
@@ -92,6 +111,7 @@ def run(host='', port=3000):
             path = r.split()[1]
             request.method = r.split()[0]
             request.body = r.split('\r\n\r\n')[1]
+            request.header = get_header(r)
 
             response = response_for_path(path)
             connection.sendall(response)
@@ -101,6 +121,6 @@ def run(host='', port=3000):
 if __name__ == '__main__':
     d = {
         'host': '',
-        'port': 2000,
+        'port': 2001,
     }
     run(**d)

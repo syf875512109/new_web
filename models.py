@@ -41,9 +41,35 @@ class Model(object):
         log('ms:', ms)
         return ms
 
+    @classmethod
+    def find_by(cls, **kwargs):
+        mode = cls.all()
+        data = [m for m in mode]
+        for k, v in kwargs.items():
+            for args in data:
+                if getattr(args, k) == v:
+                    return args
+        return None
+
+    @classmethod
+    def find_all(cls, **kwargs):
+        mode = cls.all()
+        data = [m.__dict__ for m in mode]
+        s = []
+
+        for k, v in kwargs.items():
+            for args in data:
+                if args[k] == v:
+                    s.append(cls(args))
+        return s
+
     def save(self):
         models = self.all()
         log('models', models)
+        if len(models) > 0:
+            self.id = models[-1].id + 1
+        else:
+            self.id = 1
         models.append(self)
         data = [m.__dict__ for m in models]
         path = self.db_path()
@@ -58,11 +84,21 @@ class Model(object):
 
 class User(Model):
     def __init__(self, form):
+        if form.get('id', None):
+            self.id = form['id']
+        else:
+            self.id = None
         self.username = form.get('username', '')
         self.password = form.get('password', '')
 
     def validate_login(self):
-        return self.username == 'gua' and self.password == '123'
+        mode = self.all()
+        data = [d.__dict__ for d in mode]
+        log('data', data, 'self', self.__dict__)
+        if self.find_by(username='gua'):
+            return True
+        else:
+            return False
 
     def validate_register(self):
         return len(self.username) > 2 and len(self.password) > 2
