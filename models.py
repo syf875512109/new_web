@@ -9,14 +9,14 @@ from utils import log
 def save(data, path):
     s = json.dumps(data, indent=2, ensure_ascii=False)
     with open(path, 'w+', encoding='utf-8') as f:
-        log('save', path, s, data)
+        # log('save', path, s, data)
         f.write(s)
 
 
 def load(path):
     with open(path, 'r', encoding='utf-8') as f:
         s = f.read()
-        log('load', s)
+        # log('load', s)
         return json.loads(s)
 
 
@@ -25,7 +25,7 @@ class Model(object):
     @classmethod
     def db_path(cls):
         classname = cls.__name__
-        path = '{}.txt'.format(classname)
+        path = 'db/{}.txt'.format(classname)
         return path
 
     @classmethod
@@ -38,7 +38,6 @@ class Model(object):
         path = cls.db_path()
         models = load(path)
         ms = [cls.new(m) for m in models]
-        log('ms:', ms)
         return ms
 
     @classmethod
@@ -65,12 +64,39 @@ class Model(object):
 
     def save(self):
         models = self.all()
-        log('models', models)
         if len(models) > 0:
-            self.id = models[-1].id + 1
+            if self.id is not None:
+                index = -1
+                for i, m in enumerate(models):
+                    if self.id == m.id:
+                        index = self.id
+                        break
+                if index > -1:
+                    models[index-1] = self
+            else:
+                self.id = models[-1].id + 1
+                models.append(self)
         else:
             self.id = 1
-        models.append(self)
+            models.append(self)
+        data = [m.__dict__ for m in models]
+        path = self.db_path()
+        save(data, path)
+
+    def remove(self):
+        models = self.all()
+        index = -1
+        log('self,', self)
+        if self.id is not None:
+            for i, m in enumerate(models):
+                if self.id == m.id:
+                    index = i
+                    break
+            log('index', index)
+            if index >= 0:
+                del models[index]
+
+        log('models,', models)
         data = [m.__dict__ for m in models]
         path = self.db_path()
         save(data, path)
@@ -108,3 +134,12 @@ class Message(Model):
     def __init__(self, form):
         self.author = form.get('author', '')
         self.message = form.get('message', '')
+
+
+class Todo(Model):
+    def __init__(self, form):
+        self.username = form.get('username', '')
+        if form.get('id', None):
+            self.id = form['id']
+        else:
+            self.id = None

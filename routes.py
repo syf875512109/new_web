@@ -11,6 +11,15 @@ message_list = []
 session = {}
 
 
+def director(url):
+    headers = {
+        'Location': url,
+    }
+    r = response_with_headers(headers, 302)
+    r = r + '\r\n'
+    return r.encode('utf-8')
+
+
 def random_id():
     s = 'gasdgfasdfsad6gf5safd5gfagasd'
     st = ''
@@ -28,8 +37,8 @@ def get_cookie(request):
     return username
 
 
-def response_with_headers(headers):
-    header = 'HTTP/1.1 200 OK\r\n'
+def response_with_headers(headers, code=200):
+    header = 'HTTP/1.1 {} OK\r\n'.format(code)
     header += ''.join(['{}: {}\r\n'.format(k, v) for k, v in headers.items()])
     log('header', header)
     return header

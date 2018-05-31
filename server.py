@@ -6,6 +6,7 @@ import socket
 import urllib.parse
 from utils import log
 from routes import route_dict
+from todo1 import todo_dict
 
 
 class Request(object):
@@ -73,6 +74,7 @@ def response_for_path(path):
         # '/messages': route_message,
     }
     r.update(route_dict)
+    r.update(todo_dict)
     response = r.get(request.path, error)
     return response(request)
 
