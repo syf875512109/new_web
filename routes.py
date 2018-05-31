@@ -31,9 +31,8 @@ def random_id():
 
 def get_cookie(request):
     log('Cookie', request.cookie)
-    username = request.cookie.get('user', '游客')
-    if username != '游客':
-        username = session[username]
+    session_id = request.cookie.get('user', '')
+    username = session.get(session_id, '游客')
     return username
 
 

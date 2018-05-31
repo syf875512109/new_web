@@ -6,22 +6,7 @@
   },
   {
     "id": 2,
-    "username": "guadf",
-    "password": "gsadfasd"
-  },
-  {
-    "id": 3,
-    "username": "admin",
-    "password": "s15306391161"
-  },
-  {
-    "id": 4,
-    "username": "瓜",
-    "password": "123"
-  },
-  {
-    "id": 5,
-    "username": "Hello",
+    "username": "gua1",
     "password": "123"
   }
 ]

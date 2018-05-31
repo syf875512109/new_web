@@ -76,13 +76,17 @@ def response_for_path(path):
     r.update(route_dict)
     r.update(todo_dict)
     response = r.get(request.path, error)
-    return response(request)
+    if response == error:
+        return response()
+    else:
+        return response(request)
 
 
 def get_header(r):
     header = r.split('\r\n\r\n')[0]
     header = header.split('\r\n', 1)[1]
     h = {}
+    request.cookie = {}
     for msg in header.split('\r\n'):
         k, v = msg.split(': ')
         h[k] = v
@@ -123,6 +127,6 @@ def run(host='', port=3000):
 if __name__ == '__main__':
     d = {
         'host': '',
-        'port': 2001,
+        'port': 2000,
     }
     run(**d)

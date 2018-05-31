@@ -69,10 +69,10 @@ class Model(object):
                 index = -1
                 for i, m in enumerate(models):
                     if self.id == m.id:
-                        index = self.id
+                        index = i
                         break
                 if index > -1:
-                    models[index-1] = self
+                    models[index] = self
             else:
                 self.id = models[-1].id + 1
                 models.append(self)
@@ -119,9 +119,8 @@ class User(Model):
 
     def validate_login(self):
         mode = self.all()
-        data = [d.__dict__ for d in mode]
-        log('data', data, 'self', self.__dict__)
-        if self.find_by(username='gua'):
+        u = User.find_by(username=self.username)
+        if u is not None and u.password == self.password:
             return True
         else:
             return False
@@ -143,3 +142,7 @@ class Todo(Model):
             self.id = form['id']
         else:
             self.id = None
+        if form.get('user_id', None):
+            self.user_id = form['user_id']
+        else:
+            self.user_id = None
